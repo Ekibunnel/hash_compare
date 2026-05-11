@@ -13,14 +13,9 @@ jobs:
     steps:
     - name: Install Linux and Windows Cross Compilers
       run: sudo apt-get install --yes --no-install-recommends musl-tools gcc-mingw-w64-x86-64-win32
-
-    - name: Set up MacOS Cross Compiler
-      uses: Timmmm/setup-osxcross@v2
-      with:
-        osx-version: "12.3"
-
+      
     - name: Install Rustup targets
-      run: rustup target add x86_64-unknown-linux-musl x86_64-pc-windows-gnu x86_64-apple-darwin aarch64-apple-darwin
+      run: rustup target add x86_64-unknown-linux-musl x86_64-pc-windows-gnu
 
     - name: Check out source code
       uses: actions/checkout@v6.0.2
@@ -30,12 +25,18 @@ jobs:
 
     - name: Build-linux
       run: cargo build --release --target x86_64-unknown-linux-musl
-
+      
+    - name: tar Build-linux
+      run: tar -czf target/x86_64-unknown-linux-musl.tar.gz target/x86_64-unknown-linux-musl
+      
     - name: Build-windows
       run: cargo build --release --target x86_64-pc-windows-gnu
-
-    - name: Build-apple
-      run: cargo build --release --target x86_64-apple-darwin --target aarch64-apple-darwin
+      
+    - name: Install zip
+      run: sudo apt-get install --yes --no-install-recommends zip
+      
+    - name: zip Build-windows
+      run: zip -r target/x86_64-pc-windows-gnu.zip target/x86_64-pc-windows-gnu
       
     - name: Release
       id: new-release
@@ -45,7 +46,5 @@ jobs:
         tag_name: ${{ github.run_number }}
         working_directory: target
         files: |
-          aarch64-apple-darwin/*
-          x86_64-apple-darwin/*
-          x86_64-pc-windows-gnu/*
-          x86_64-unknown-linux-musl/*
+          x86_64-pc-windows-gnu.zip
+          x86_64-unknown-linux-musl.tar.gz
