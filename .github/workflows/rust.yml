@@ -1,9 +1,6 @@
 name: Rust
 
 on:
-  push:
-    branches:
-      - "**"
   workflow_dispatch:
 
 env:
@@ -31,11 +28,24 @@ jobs:
     - name: Check
       run: cargo check
 
-    - name: Build
-      run: cargo build --target x86_64-unknown-linux-musl --target x86_64-pc-windows-gnu --target x86_64-apple-darwin --target aarch64-apple-darwin
+    - name: Build-linux
+      run: cargo build --release --target x86_64-unknown-linux-musl
 
-    - name: Upload Binaries
-      uses: actions/upload-artifact@v7.0.1
+    - name: Build-windows
+      run: cargo build --release --target x86_64-pc-windows-gnu
+
+    - name: Build-apple
+      run: cargo build --release --target x86_64-apple-darwin --target aarch64-apple-darwin
+      
+    - name: Release
+      id: new-release
+      uses: softprops/action-gh-release@v3
       with:
-        name: binaries
-        path: target
+        name: Release ${{ github.run_number }}
+        tag_name: ${{ github.run_number }}
+        working_directory: target
+        files: |
+          aarch64-apple-darwin/*
+          x86_64-apple-darwin/*
+          x86_64-pc-windows-gnu/*
+          x86_64-unknown-linux-musl/*
