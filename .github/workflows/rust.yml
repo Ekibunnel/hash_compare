@@ -1,4 +1,4 @@
-name: Tests and release
+name: Rust
 
 on:
   push:
@@ -6,57 +6,15 @@ on:
       - "**"
   pull_request:
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  test:
-    name: ${{ matrix.platform.os-name }} with rust ${{ matrix.toolchain }}
-    runs-on: ${{ matrix.platform.runs-on }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - os-name: Linux-x86_64
-            runs-on: ubuntu-24.04
-            target: x86_64-unknown-linux-musl
-            bin: hash_compare
-            name: hash_compare-Linux-x86_64-musl.tar.gz
-          - os-name: Windows-x86_64
-            runs-on: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: hash_compare.exe
-            name: hash_compare-Windows-x86_64.zip
-          - os-name: macOS-x86_64
-            runs-on: macOS-latest
-            target: x86_64-apple-darwin
-            bin: hash_compare
-            name: hash_compare-Darwin-x86_64.tar.gz
-        toolchain:
-          - stable
-        include:
-          - platform:
-              os-name: Linux-x86_64
-              runs-on: ubuntu-24.04
-              target: x86_64-unknown-linux-musl
-              bin: hash_compare
-            toolchain: beta
-          - platform:
-              os-name: Linux-x86_64
-              runs-on: ubuntu-24.04
-              target: x86_64-unknown-linux-musl
-              bin: hash_compare
-            toolchain: nightly
+  build:
+
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Build binary
-        uses: houseabsolute/actions-rust-cross@v1
-        with:
-          command: "build"
-          target: ${{ matrix.platform.target }}
-          toolchain: ${{ matrix.toolchain }}
-          args: "--locked --release"
-          strip: true
-          cross-version: 107433fa9d71d7eb506cd5bf5467bab89edb7a52
-      - name: Publish artifacts and release
-        uses: houseabsolute/actions-rust-release@v0
-        with:
-          executable-name: hash_compare
-          target: ${{ matrix.platform.target }}
-        if: matrix.toolchain == 'stable'
+    - uses: actions/checkout@v4
+    - name: Build
+      run: cargo build --verbose
