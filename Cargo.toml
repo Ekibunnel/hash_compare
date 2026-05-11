@@ -1,0 +1,13 @@
+[package]
+name = "hash_compare"
+version = "0.0.1"
+authors = ["Ekibunnel"]
+edition = "2024"
+repository = "https://github.com/Ekibunnel/hash_compare/"
+
+[dependencies]
+num_cpus = "1.17"
+
+[[bin]]
+name = "hash_compare"
+path = "hash_compare.rs"
